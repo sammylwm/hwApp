@@ -56,9 +56,9 @@ suspend fun loadData(context: Context){
         for (i in 0 until rawData.length()) {
             val item = rawData.getJSONArray(i)
             val entry = JSONArray().apply {
-                put(item.getString(0)) // subject
-                put(item.getString(1)) // avg
-                put(item.getJSONArray(2)) // marks list
+                put(item.getString(0))
+                put(item.getString(1))
+                put(item.getJSONArray(2))
             }
             avgMarks.put(entry)
         }

@@ -2,6 +2,9 @@ package com.sammy.hwapp.screens.main
 
 import DrawerBody
 import DrawerHeader
+import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.core.content.edit
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.sammy.hwapp.routeScreen
@@ -50,9 +54,11 @@ import com.sammy.hwapp.screens.main.fragments.homework.HwViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.util.Date
 import java.util.Locale
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(navHostController: NavHostController, viewModel: HwViewModel = viewModel()) {
@@ -60,7 +66,7 @@ fun MainScreen(navHostController: NavHostController, viewModel: HwViewModel = vi
     val ifShowDatePicker by viewModel.ifShowDatePicker.collectAsState()
     val today: String = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date())
     var selectedDate by remember { mutableStateOf(today) }
-
+    markAppOpenedToday(context)
     val navController = rememberNavController()
     if (ifShowDatePicker) {
         DatePickerModal(
@@ -173,4 +179,11 @@ fun DatePickerModal(
     ) {
         DatePicker(state = datePickerState)
     }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun markAppOpenedToday(context: Context) {
+    val prefs = context.getSharedPreferences("app_usage", Context.MODE_PRIVATE)
+    val today = LocalDate.now().toString()
+    prefs.edit { putString("last_open_date", today) }
 }
