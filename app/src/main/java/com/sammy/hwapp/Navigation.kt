@@ -21,7 +21,7 @@ fun ActivityNavigation(navHostController: NavHostController) {
         composable("Splash") { SplashScreen(navHostController) }
         composable("Login") { LoginScreen(navHostController) }
         composable("Register") { RegisterScreen(navHostController) }
-        composable("Main") { MainScreen() }
+        composable("Main") { MainScreen(navHostController) }
     }
 }
 

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DatePicker
@@ -35,9 +36,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import com.sammy.hwapp.routeScreen
 import com.sammy.hwapp.screens.main.fragments.BottomNavigation
 import com.sammy.hwapp.screens.main.fragments.NavGraph
 import com.sammy.hwapp.screens.main.fragments.homework.HwViewModel
@@ -48,7 +51,8 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(viewModel: HwViewModel = viewModel()) {
+fun MainScreen(navHostController: NavHostController, viewModel: HwViewModel = viewModel()) {
+    val context = LocalContext.current
     val ifShowDatePicker by viewModel.ifShowDatePicker.collectAsState()
     val selectedDate by viewModel.selectedDate.collectAsState()
     val navController = rememberNavController()
@@ -111,10 +115,13 @@ fun MainScreen(viewModel: HwViewModel = viewModel()) {
                         )
                     },
                     actions = {
-                        IconButton(onClick = { /* do something */ }) {
+                        IconButton(onClick = {
+                            viewModel.clearSharedPref(context)
+                            routeScreen(navHostController, "Login")
+                        }) {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Localized description"
+                                imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                                contentDescription = "exit"
                             )
                         }
                     },

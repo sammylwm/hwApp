@@ -26,14 +26,6 @@ class HwViewModel : ViewModel() {
     private val _showDatePicker = MutableStateFlow(false)
     val ifShowDatePicker: StateFlow<Boolean> = _showDatePicker
 
-    fun showDatePicker(bool: Boolean){
-        _showDatePicker.value = bool
-    }
-
-    fun setSelectedDate(date: String){
-        _selectedDate.value = date
-    }
-
     private val _addHw = MutableStateFlow<String?>(null)
     val ifAddHw: StateFlow<String?> = _addHw
 
@@ -57,6 +49,19 @@ class HwViewModel : ViewModel() {
 
     private val _ifAdmin = MutableStateFlow<String?>(null)
     val ifAdmin: StateFlow<String?> = _ifAdmin
+
+    fun showDatePicker(bool: Boolean){
+        _showDatePicker.value = bool
+    }
+
+    fun setSelectedDate(date: String){
+        _selectedDate.value = date
+    }
+
+    fun clearSharedPref(context: Context){
+        val sharedPref = SharedPref(context, "UserData")
+        sharedPref.clear()
+    }
 
     fun loadSharedPref(context: Context){
         val sharedPref = SharedPref(context, "UserData")

@@ -16,4 +16,8 @@ class SharedPref(context: Context, name: String) {
     }
     fun get(name: String): String = sharedPref.getString(name, "") ?: ""
     fun contains(name: String): Boolean = sharedPref.contains(name)
+
+    fun clear(){
+        sharedPref.edit{clear()}
+    }
 }
