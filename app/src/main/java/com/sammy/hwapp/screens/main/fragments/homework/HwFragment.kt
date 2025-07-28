@@ -65,7 +65,6 @@ val lessonTimes = listOf(
 fun HwFragment(view: HwViewModel = viewModel()) {
     val showDatePicker by view.ifShowDatePicker.collectAsState()
     val date by view.selectedDate.collectAsState()
-    val isLoaded by view.isLoaded.collectAsState()
     val addHwState by view.addHwState.collectAsState()
     val isAddHw by view.ifAddHw.collectAsState()
     val isSharedPref by view.isSharedPref.collectAsState()
