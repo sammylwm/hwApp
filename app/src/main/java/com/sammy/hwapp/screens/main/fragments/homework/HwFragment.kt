@@ -28,6 +28,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -65,21 +66,13 @@ val lessonTimes = listOf(
 
 @Composable
 fun HwFragment(view: HwViewModel = viewModel(), date: String) {
-    val showDatePicker by view.ifShowDatePicker.collectAsState()
-    val addHwState by view.addHwState.collectAsState()
-    val isAddHw by view.ifAddHw.collectAsState()
-    val isSharedPref by view.isSharedPref.collectAsState()
-    val isLoading by view.isLoading.collectAsState()
-    val className by view.className.collectAsState()
-    val ifAdmin by view.ifAdmin.collectAsState()
     val context = LocalContext.current
-    val subjects = view.subjects
-    val homeworks = view.homeworks
+    val uiState by view.uiState.collectAsState()
 
-    if (addHwState) {
+    if (uiState.addHwState) {
         Toast.makeText(
             context,
-            isAddHw,
+            uiState.ifAddHw,
             Toast.LENGTH_SHORT
         ).show()
     }
@@ -90,16 +83,13 @@ fun HwFragment(view: HwViewModel = viewModel(), date: String) {
     LaunchedEffect(Unit) {
         view.loadSharedPref(context)
     }
-    LaunchedEffect(isSharedPref) {
-        if (isSharedPref) view.load(date, className!!, context)
-    }
     LaunchedEffect(date) {
-        if (isSharedPref) view.load(date, className!!, context)
+        if (uiState.isSharedPref) view.load(date, uiState.className!!)
     }
 
 
     Box(modifier = Modifier.fillMaxSize()) {
-        if (isLoading) {
+        if (uiState.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         } else {
             LazyColumn(
@@ -107,13 +97,13 @@ fun HwFragment(view: HwViewModel = viewModel(), date: String) {
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp)
             ) {
-                itemsIndexed(subjects) { index, subject ->
+                itemsIndexed(uiState.subjects) { index, subject ->
                     val time = lessonTimes.getOrNull(index) ?: ""
-                    SubjectCard(subject, time, homeworks.getOrNull(index) ?: "")
+                    SubjectCard(subject, time, uiState.homeworks.getOrNull(index) ?: "")
                 }
             }
         }
-        if (ifAdmin == "1") {
+        if (uiState.ifAdmin) {
             FloatingActionButton(
                 onClick = { showDialog = true },
                 modifier = Modifier
@@ -129,13 +119,13 @@ fun HwFragment(view: HwViewModel = viewModel(), date: String) {
             onDismiss = { showDialog = false },
             onSubmit = { subject, homework, selDate ->
                 showDialog = false
-                view.addHw(homework, subject, selDate, className.toString())
+                view.addHw(homework, subject, selDate, uiState.className.toString())
             },
             selectedDate = selectedDate,
             onDateClick = { view.showDatePicker(true) }
         )
     }
-    if (showDatePicker) {
+    if (uiState.ifShowDatePicker) {
         DatePickerModal(
             onDateSelected = { millis ->
                 millis?.let {
@@ -159,13 +149,17 @@ fun SubjectCard(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
+    val colorScheme = MaterialTheme.colorScheme
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { expanded = !expanded },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFAFAFA))
+        colors = CardDefaults.cardColors(
+            containerColor = colorScheme.surface
+        )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -176,6 +170,7 @@ fun SubjectCard(
                     text = subject,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
+                    color = colorScheme.onSurface,
                     modifier = Modifier.weight(1f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -183,7 +178,7 @@ fun SubjectCard(
                 Text(
                     text = time,
                     fontSize = 16.sp,
-                    color = Color.Gray
+                    color = colorScheme.primary
                 )
             }
 
@@ -195,7 +190,7 @@ fun SubjectCard(
                 Text(
                     text = homework,
                     fontSize = 14.sp,
-                    color = Color.DarkGray,
+                    color = colorScheme.onSurfaceVariant, // ✅ менее акцентный, но читаемый цвет
                     modifier = Modifier
                         .padding(top = 12.dp)
                         .fillMaxWidth()

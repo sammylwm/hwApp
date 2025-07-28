@@ -63,12 +63,12 @@ import java.util.Locale
 @Composable
 fun MainScreen(navHostController: NavHostController, viewModel: HwViewModel = viewModel()) {
     val context = LocalContext.current
-    val ifShowDatePicker by viewModel.ifShowDatePicker.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     val today: String = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date())
     var selectedDate by remember { mutableStateOf(today) }
     markAppOpenedToday(context)
     val navController = rememberNavController()
-    if (ifShowDatePicker) {
+    if (uiState.ifShowDatePicker) {
         DatePickerModal(
             onDateSelected = { millis ->
                 millis?.let {
