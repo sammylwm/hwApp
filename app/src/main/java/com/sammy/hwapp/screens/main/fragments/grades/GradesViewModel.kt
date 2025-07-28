@@ -23,6 +23,7 @@ import androidx.lifecycle.ViewModel
 import com.sammy.hwapp.SharedPref
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.json.JSONArray
 import java.util.random.RandomGenerator.StreamableGenerator
 
@@ -32,25 +33,31 @@ data class GradeEntry(
     val grade: String
 )
 
-class GradesViewModel: ViewModel() {
-    private val _grades = mutableStateListOf<GradeEntry>()
-    val grades: SnapshotStateList<GradeEntry> = _grades
+data class UiState(
+    val grades: List<GradeEntry> = listOf(),
+    val isLoaded: Boolean = false
+)
 
-    private val _isLoaded = MutableStateFlow(false)
-    val isLoaded: StateFlow<Boolean> = _isLoaded
+class GradesViewModel: ViewModel() {
+    private val _uiState = MutableStateFlow(UiState())
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     fun loadGrades(context: Context){
         val sharedPref = SharedPref(context, "userMarks")
         val marksJson = sharedPref.get("marks")
         val jsonArray = JSONArray(marksJson)
+        val array = emptyList<GradeEntry>().toMutableList()
         for (i in 0 until jsonArray.length()) {
             val item = jsonArray.getJSONArray(i)
             val date = item.getString(0)
             val subject = item.getString(1)
             val grade = item.getString(2)
-            _grades.add(GradeEntry(date, subject, grade))
+                array.add(GradeEntry(date, subject, grade))
         }
-        _isLoaded.value = true
+        _uiState.value = _uiState.value.copy(
+            grades = array,
+            isLoaded = true
+        )
     }
 }
 

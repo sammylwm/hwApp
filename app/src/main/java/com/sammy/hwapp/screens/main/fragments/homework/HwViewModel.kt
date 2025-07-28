@@ -34,9 +34,6 @@ data class UiState(
 class HwViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
-    init {
-    }
-
     fun showDatePicker(bool: Boolean){
         _uiState.value = _uiState.value.copy(ifShowDatePicker = bool)
     }

@@ -1,6 +1,10 @@
 package com.sammy.hwapp.screens.main.fragments.allGrades
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,6 +17,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,15 +39,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun GradesAllFragment(view: GradesAllViewModel = viewModel()) {
     val context = LocalContext.current
-    val isLoaded by view.isLoaded.collectAsState()
-    val subjectList = view.subjects
-    val gradesList = view.grades
-    val marksList = view.marks
+    val uiState by view.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
         view.load(context)
     }
-    if (isLoaded){
+    if (uiState.isLoaded){
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -52,8 +54,8 @@ fun GradesAllFragment(view: GradesAllViewModel = viewModel()) {
                 bottom = 100.dp
             )
         ) {
-            itemsIndexed(subjectList) { index, item ->
-                SubjectAllGradesCard(item, gradesList[index], marksList[index])
+            itemsIndexed(uiState.subjects) { index, item ->
+                SubjectAllGradesCard(item, uiState.grades[index], uiState.marks[index])
             }
         }
     }
@@ -69,11 +71,13 @@ fun SubjectAllGradesCard(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    val color = when {
-        (grades.toFloatOrNull() ?: 0f) < 3f -> Color.Red
-        (grades.toFloatOrNull() ?: 0f) < 4f -> Color(0xFFFFA000)
-        (grades.toFloatOrNull() ?: 0f) <= 5f -> Color(0xFF4CAF50)
-        else -> Color.Gray
+    val colorScheme = MaterialTheme.colorScheme
+
+    val gradeColor = when (grades.toFloatOrNull() ?: 0f) {
+        in 0f..<3f -> colorScheme.error
+        in 3f..<4f -> colorScheme.tertiary
+        in 4f..5f -> colorScheme.primary
+        else -> colorScheme.outline
     }
 
     Card(
@@ -82,7 +86,7 @@ fun SubjectAllGradesCard(
             .clickable { expanded = !expanded },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFAFAFA))
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -93,6 +97,7 @@ fun SubjectAllGradesCard(
                     text = subject,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
+                    color = colorScheme.onSurface,
                     modifier = Modifier.weight(1f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -100,16 +105,20 @@ fun SubjectAllGradesCard(
                 Text(
                     text = grades,
                     fontSize = 16.sp,
-                    color = color
+                    color = gradeColor
                 )
             }
 
-            AnimatedVisibility(visible = expanded) {
+            AnimatedVisibility(
+                visible = expanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
                 Column(modifier = Modifier.padding(top = 12.dp)) {
                     Text(
                         text = allGrades.joinToString(", "),
                         fontSize = 14.sp,
-                        color = Color.DarkGray
+                        color = colorScheme.onSurfaceVariant
                     )
                 }
             }

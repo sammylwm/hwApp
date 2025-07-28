@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,18 +31,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun GradesFragment(view: GradesViewModel = viewModel()) {
     val context = LocalContext.current
-    val grades = view.grades.toList()
-    val ready by view.isLoaded.collectAsState()
+    val uiState by view.uiState.collectAsState()
     LaunchedEffect(Unit) {
         view.loadGrades(context)
     }
-    if (ready){
+    if (uiState.isLoaded){
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp)
         ) {
-            items(grades) { entry ->
+            items(uiState.grades) { entry ->
                 GradeCard(entry)
             }
         }
@@ -51,19 +51,22 @@ fun GradesFragment(view: GradesViewModel = viewModel()) {
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun GradeCard(entry: GradeEntry) {
-    val color = when (entry.grade.toFloatOrNull() ?: 0f) {
-        in 0f..<3f -> Color.Red
-        in 3f..<4f -> Color(0xFFFFA000)
-        in 4f..5f -> Color(0xFF4CAF50)
-        else -> Color.Gray
+    val colorScheme = MaterialTheme.colorScheme
+
+    val gradeColor = when (entry.grade.toFloatOrNull() ?: 0f) {
+        in 0f..<3f -> colorScheme.error
+        in 3f..<4f -> colorScheme.tertiary
+        in 4f..5f -> colorScheme.primary
+        else -> colorScheme.outline
     }
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFAFAFA))
+        colors = CardDefaults.cardColors(
+            containerColor = colorScheme.surface
+        )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -75,20 +78,21 @@ fun GradeCard(entry: GradeEntry) {
                         text = entry.subject,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
+                        color = colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
                         text = entry.date,
                         fontSize = 14.sp,
-                        color = Color.Gray
+                        color = colorScheme.onSurfaceVariant
                     )
                 }
 
                 Text(
                     text = entry.grade,
                     fontSize = 20.sp,
-                    color = color,
+                    color = gradeColor,
                     fontWeight = FontWeight.Bold
                 )
             }
