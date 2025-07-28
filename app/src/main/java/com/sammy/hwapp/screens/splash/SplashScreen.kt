@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class SplashViewModel : ViewModel() {
-    private val _tasks = MutableSharedFlow<String>()
     private val _loginResult = MutableStateFlow<Int?>(null)
     val loginResult: StateFlow<Int?> = _loginResult
 
@@ -49,6 +48,7 @@ class SplashViewModel : ViewModel() {
             }
         } else {
             _loginResult.value = 0
+            _isLoaded.value = true
         }
     }
 }
