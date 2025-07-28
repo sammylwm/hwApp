@@ -1,7 +1,6 @@
 package com.sammy.hwapp.screens.main.fragments.homework
 
 import AddHomeworkDialog
-import DatePickerModal
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -46,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sammy.hwapp.SharedPref
+import com.sammy.hwapp.screens.main.DatePickerModal
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -63,6 +63,8 @@ val lessonTimes = listOf(
 
 @Composable
 fun HwFragment(view: HwViewModel = viewModel()) {
+    val showDatePicker by view.ifShowDatePicker.collectAsState()
+    val date by view.selectedDate.collectAsState()
     val isLoaded by view.isLoaded.collectAsState()
     val addHwState by view.addHwState.collectAsState()
     val isAddHw by view.ifAddHw.collectAsState()
@@ -71,7 +73,6 @@ fun HwFragment(view: HwViewModel = viewModel()) {
     val className by view.className.collectAsState()
     val ifAdmin by view.ifAdmin.collectAsState()
     val context = LocalContext.current
-    val date = "28.07.2025"
     val subjects = view.subjects
     val homeworks = view.homeworks
 
@@ -84,7 +85,6 @@ fun HwFragment(view: HwViewModel = viewModel()) {
     }
 
     var showDialog by remember { mutableStateOf(false) }
-    var showDatePicker by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
@@ -92,7 +92,7 @@ fun HwFragment(view: HwViewModel = viewModel()) {
     }
     LaunchedEffect(isSharedPref, className) {
         if (isSharedPref && !className.isNullOrBlank()) {
-            view.load(date, className!!, context)
+            view.load(date.toString(), className!!, context)
         }
     }
     Box(modifier = Modifier.fillMaxSize()) {
@@ -129,7 +129,7 @@ fun HwFragment(view: HwViewModel = viewModel()) {
                 view.addHw(homework, subject, selDate, className.toString())
             },
             selectedDate = selectedDate,
-            onDateClick = { showDatePicker = true }
+            onDateClick = { view.showDatePicker(true) }
         )
     }
     if (showDatePicker) {
@@ -138,9 +138,9 @@ fun HwFragment(view: HwViewModel = viewModel()) {
                 millis?.let {
                     selectedDate = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date(it))
                 }
-                showDatePicker = false
+                view.showDatePicker(false)
             },
-            onDismiss = { showDatePicker = false }
+            onDismiss = { view.showDatePicker(false) }
         )
     }
 }

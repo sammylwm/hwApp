@@ -11,10 +11,28 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.json.JSONArray
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class HwViewModel : ViewModel() {
     private val _isSharedPref = MutableStateFlow(false)
     val isSharedPref: StateFlow<Boolean> = _isSharedPref
+
+    private val today: String = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date())
+    private val _selectedDate = MutableStateFlow<String?>(today)
+    val selectedDate: StateFlow<String?> = _selectedDate
+
+    private val _showDatePicker = MutableStateFlow(false)
+    val ifShowDatePicker: StateFlow<Boolean> = _showDatePicker
+
+    fun showDatePicker(bool: Boolean){
+        _showDatePicker.value = bool
+    }
+
+    fun setSelectedDate(date: String){
+        _selectedDate.value = date
+    }
 
     private val _addHw = MutableStateFlow<String?>(null)
     val ifAddHw: StateFlow<String?> = _addHw
