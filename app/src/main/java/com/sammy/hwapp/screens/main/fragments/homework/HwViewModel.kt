@@ -72,8 +72,8 @@ class HwViewModel : ViewModel() {
 
     fun addHw(homework: String, subject: String, selectedDate: String, className: String){
         viewModelScope.launch {
-            val result = LogIo.addHw(homework, subject, selectedDate, className).toBoolean()
-            _addHw.value = if (result) "Успешно добавлено!" else "Ошибка при добавлении"
+            val result = LogIo.addHw(homework, subject, selectedDate, className).toIntOrNull()
+            _addHw.value = if (result == 1) "Успешно добавлено!" else "Ошибка при добавлении"
             _addHwState.value = true
         }
     }
