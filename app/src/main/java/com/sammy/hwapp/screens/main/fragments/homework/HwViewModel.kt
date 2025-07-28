@@ -2,6 +2,7 @@ package com.sammy.hwapp.screens.main.fragments.homework
 
 import LogIo
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
@@ -50,12 +51,19 @@ class HwViewModel : ViewModel() {
     private val _ifAdmin = MutableStateFlow<String?>(null)
     val ifAdmin: StateFlow<String?> = _ifAdmin
 
+    private val _ifLoad = MutableStateFlow(false)
+    val ifLoad: StateFlow<Boolean> = _ifLoad
+
     fun showDatePicker(bool: Boolean){
         _showDatePicker.value = bool
     }
 
     fun setSelectedDate(date: String){
-        _selectedDate.value = date
+        Log.d("MYDEBUG", "setSelectedDate called with $date")
+        _selectedDate.value = "$date"
+    }
+    fun setIfLoad(value: Boolean) {
+        _ifLoad.value = value
     }
 
     fun clearSharedPref(context: Context){
@@ -81,6 +89,8 @@ class HwViewModel : ViewModel() {
     fun load(date: String, className: String, context: Context) {
         viewModelScope.launch {
             _isLoading.value = true
+            _homeworks.clear()
+            _subjects.clear()
             val result = LogIo.getHw(date, className)
             val jsonArray = JSONArray(result ?: "[]")
             for (i in 0 until jsonArray.length()) {
