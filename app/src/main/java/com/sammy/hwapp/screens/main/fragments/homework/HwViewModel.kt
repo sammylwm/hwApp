@@ -19,11 +19,6 @@ import java.util.Locale
 class HwViewModel : ViewModel() {
     private val _isSharedPref = MutableStateFlow(false)
     val isSharedPref: StateFlow<Boolean> = _isSharedPref
-
-    private val today: String = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date())
-    private val _selectedDate = MutableStateFlow<String?>(today)
-    val selectedDate: StateFlow<String?> = _selectedDate
-
     private val _showDatePicker = MutableStateFlow(false)
     val ifShowDatePicker: StateFlow<Boolean> = _showDatePicker
 
@@ -56,11 +51,6 @@ class HwViewModel : ViewModel() {
 
     fun showDatePicker(bool: Boolean){
         _showDatePicker.value = bool
-    }
-
-    fun setSelectedDate(date: String){
-        Log.d("MYDEBUG", "setSelectedDate called with $date")
-        _selectedDate.value = "$date"
     }
     fun setIfLoad(value: Boolean) {
         _ifLoad.value = value

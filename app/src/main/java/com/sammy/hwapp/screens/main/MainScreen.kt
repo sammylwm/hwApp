@@ -34,7 +34,10 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
@@ -44,6 +47,7 @@ import com.sammy.hwapp.routeScreen
 import com.sammy.hwapp.screens.main.fragments.BottomNavigation
 import com.sammy.hwapp.screens.main.fragments.NavGraph
 import com.sammy.hwapp.screens.main.fragments.homework.HwViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -54,13 +58,15 @@ import java.util.Locale
 fun MainScreen(navHostController: NavHostController, viewModel: HwViewModel = viewModel()) {
     val context = LocalContext.current
     val ifShowDatePicker by viewModel.ifShowDatePicker.collectAsState()
-    val selectedDate by viewModel.selectedDate.collectAsState()
+    val today: String = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date())
+    var selectedDate by remember { mutableStateOf(today) }
+
     val navController = rememberNavController()
     if (ifShowDatePicker) {
         DatePickerModal(
             onDateSelected = { millis ->
                 millis?.let {
-                    viewModel.setSelectedDate(SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date(it)))
+                    selectedDate = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date(it))
                 }
                 viewModel.showDatePicker(false)
             },
@@ -130,7 +136,7 @@ fun MainScreen(navHostController: NavHostController, viewModel: HwViewModel = vi
             }
         ) { padding ->
             Box(modifier = Modifier.padding(padding)) {
-                NavGraph(navHostController = navController)
+                NavGraph(navHostController = navController, selectedDate)
             }
 
         }

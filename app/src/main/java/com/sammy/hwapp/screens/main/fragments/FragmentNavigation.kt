@@ -21,6 +21,7 @@ import androidx.navigation.compose.composable
 import com.sammy.hwapp.screens.main.fragments.allGrades.GradesAllFragment
 import com.sammy.hwapp.screens.main.fragments.grades.GradesFragment
 import com.sammy.hwapp.screens.main.fragments.homework.HwFragment
+import kotlinx.coroutines.flow.StateFlow
 
 sealed class BottomItemMy (
     val title: String,
@@ -33,9 +34,9 @@ sealed class BottomItemMy (
 }
 
 @Composable
-fun NavGraph(navHostController: NavHostController) {
+fun NavGraph(navHostController: NavHostController, date: String) {
     NavHost(navController = navHostController, startDestination = "hw_screen") {
-        composable("hw_screen") { HwFragment() }
+        composable("hw_screen") { HwFragment(date=date) }
         composable("grades_screen") { GradesFragment() }
         composable("grades_all_screen") { GradesAllFragment() }
     }

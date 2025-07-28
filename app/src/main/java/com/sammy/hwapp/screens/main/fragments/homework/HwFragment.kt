@@ -47,24 +47,160 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sammy.hwapp.SharedPref
 import com.sammy.hwapp.screens.main.DatePickerModal
+import kotlinx.coroutines.flow.StateFlow
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+val lessonTimes = listOf(
+    "08:00\n08:40",
+    "08:50\n09:30",
+    "09:40\n10:20",
+    "10:30\n11:10",
+    "11:20\n12:00",
+    "12:10\n12:50",
+    "13:00\n13:40",
+    "13:50\n14:30"
+)
 
 @Composable
-fun HwFragment(view: HwViewModel = viewModel()) {val showDatePicker by view.ifShowDatePicker.collectAsState()
-    val date by view.selectedDate.collectAsState()
+fun HwFragment(view: HwViewModel = viewModel(), date: String) {
+    val showDatePicker by view.ifShowDatePicker.collectAsState()
+    val addHwState by view.addHwState.collectAsState()
+    val isAddHw by view.ifAddHw.collectAsState()
+    val isSharedPref by view.isSharedPref.collectAsState()
+    val isLoading by view.isLoading.collectAsState()
+    val className by view.className.collectAsState()
+    val ifAdmin by view.ifAdmin.collectAsState()
     val context = LocalContext.current
+    val subjects = view.subjects
+    val homeworks = view.homeworks
+
+    if (addHwState) {
+        Toast.makeText(
+            context,
+            isAddHw,
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    var showDialog by remember { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         view.loadSharedPref(context)
     }
-    Log.d("MYDEBUG", "date in composable = $date")
+    LaunchedEffect(isSharedPref) {
+        if (isSharedPref) view.load(date, className!!, context)
+    }
     LaunchedEffect(date) {
-        Log.d(
-            "MYDEBUG",
-            "LaunchedEffect triggered with date=$date"
+        if (isSharedPref) view.load(date, className!!, context)
+    }
+
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (isLoading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp)
+            ) {
+                itemsIndexed(subjects) { index, subject ->
+                    val time = lessonTimes.getOrNull(index) ?: ""
+                    SubjectCard(subject, time, homeworks.getOrNull(index) ?: "")
+                }
+            }
+        }
+        if (ifAdmin == "1") {
+            FloatingActionButton(
+                onClick = { showDialog = true },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(bottom = 10.dp, end = 10.dp)
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = "Add")
+            }
+        }
+    }
+    if (showDialog) {
+        AddHomeworkDialog(
+            onDismiss = { showDialog = false },
+            onSubmit = { subject, homework, selDate ->
+                showDialog = false
+                view.addHw(homework, subject, selDate, className.toString())
+            },
+            selectedDate = selectedDate,
+            onDateClick = { view.showDatePicker(true) }
         )
+    }
+    if (showDatePicker) {
+        DatePickerModal(
+            onDateSelected = { millis ->
+                millis?.let {
+                    selectedDate =
+                        SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date(it))
+                }
+                view.showDatePicker(false)
+            },
+            onDismiss = { view.showDatePicker(false) }
+        )
+    }
+}
+
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun SubjectCard(
+    subject: String,
+    time: String,
+    homework: String
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { expanded = !expanded },
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFAFAFA))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = subject,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = time,
+                    fontSize = 16.sp,
+                    color = Color.Gray
+                )
+            }
+
+            AnimatedVisibility(
+                visible = expanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Text(
+                    text = homework,
+                    fontSize = 14.sp,
+                    color = Color.DarkGray,
+                    modifier = Modifier
+                        .padding(top = 12.dp)
+                        .fillMaxWidth()
+                )
+            }
+        }
     }
 }
