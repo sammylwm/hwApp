@@ -7,75 +7,76 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.sammy.hwapp.SharedPref
+import com.sammy.hwapp.screens.main.fragments.homework.UiState
 import com.sammy.hwapp.screens.splash.loadData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class RegisterViewModel: ViewModel() {
-    private val _isLoaded = MutableStateFlow(false)
-    val isLoaded: StateFlow<Boolean> = _isLoaded
-
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading
-
-    private val _onError = MutableStateFlow<String?>(null)
-    val onError: StateFlow<String?> = _onError
-
-    private val _onErrorEmail = MutableStateFlow<String?>(null)
-    val onErrorEmail: StateFlow<String?> = _onErrorEmail
-
-    private val _onErrorPassword = MutableStateFlow<String?>(null)
-    val onErrorPassword: StateFlow<String?> = _onErrorPassword
-
-    private val _onErrorLoginDn = MutableStateFlow<String?>(null)
-    val onErrorLoginDn: StateFlow<String?> = _onErrorLoginDn
-
-    private val _onErrorPasswordDn = MutableStateFlow<String?>(null)
-    val onErrorPasswordDn: StateFlow<String?> = _onErrorPasswordDn
-
-    private val _onErrorClass = MutableStateFlow<String?>(null)
-    val onErrorClass: StateFlow<String?> = _onErrorClass
+data class RegisterUiState(
+    val isLoaded: Boolean = false,
+    val isLoading: Boolean = false,
+    val onError: String? = null,
+    val onErrorEmail: String? = null,
+    val onErrorPassword: String? = null,
+    val onErrorLoginDn: String? = null,
+    val onErrorPasswordDn: String? = null,
+    val onErrorClass: String? = null,
+)
 
 
-
-    fun validate(email: String, password: String, loginDn: String, passwordDn: String, selectedClass: String): Boolean{
+class RegisterViewModel : ViewModel() {
+    private val _uiState = MutableStateFlow(RegisterUiState())
+    val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
+    fun validate(
+        email: String,
+        password: String,
+        loginDn: String,
+        passwordDn: String,
+        selectedClass: String
+    ): Boolean {
         when {
             email.isBlank() || password.isBlank() || loginDn.isBlank()
                     || passwordDn.isBlank() || selectedClass.isBlank() -> {
-                _onErrorEmail.value = if (email.isBlank()) "Введите почту" else null
-                _onErrorLoginDn.value =
-                    if (loginDn.isBlank()) "Введите логин от дневника" else null
-                _onErrorPassword.value =
-                    if (password.isBlank()) "Введите пароль" else null
-                _onErrorPasswordDn.value =
-                    if (passwordDn.isBlank()) "Введите пароль от дневника" else null
-                _onErrorClass.value =
-                    if (selectedClass.isBlank()) "Выберите класс" else null
+                _uiState.value = _uiState.value.copy(
+                    onErrorEmail = if (email.isBlank()) "Введите почту" else null,
+                    onErrorLoginDn = if (loginDn.isBlank()) "Введите логин от дневника" else null,
+                    onErrorPassword = if (password.isBlank()) "Введите пароль" else null,
+                    onErrorPasswordDn = if (passwordDn.isBlank()) "Введите пароль от дневника" else null,
+                    onErrorClass = if (selectedClass.isBlank()) "Выберите класс" else null,
+                )
                 return false
             }
 
-            !email.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) -> {
-                _onErrorEmail.value = "Введите корректный email"
+            !email.matches(Regex("^[A-Za-z0-9+_uiState..-]+@[A-Za-z0-9.-]+$")) -> {
+                _uiState.value = _uiState.value.copy(
+                    onErrorEmail = "Введите корректный email"
+                )
                 return false
             }
 
             !password.matches(Regex("^[a-zA-Z0-9]+\$")) -> {
-                _onErrorPassword.value =
-                    "Пароль должен содержать только латинские буквы и цифры"
+                _uiState.value = _uiState.value.copy(
+                    onErrorPassword =
+                        "Пароль должен содержать только латинские буквы и цифры"
+                )
                 return false
             }
 
             password.length < 6 -> {
-                _onErrorPassword.value = "Пароль слишком короткий!"
+
+                _uiState.value = _uiState.value.copy(onErrorPassword = "Пароль слишком короткий!")
                 return false
             }
         }
-        _onErrorEmail.value = null
-        _onErrorPassword.value = null
-        _onErrorLoginDn.value = null
-        _onErrorPasswordDn.value = null
-        _onErrorClass.value = null
+        _uiState.value = _uiState.value.copy(
+            onErrorEmail = null,
+            onErrorPassword = null,
+            onErrorLoginDn = null,
+            onErrorPasswordDn = null,
+            onErrorClass = null,
+        )
         return true
     }
 
@@ -87,32 +88,51 @@ class RegisterViewModel: ViewModel() {
         loginDnevnik: String,
         passwordDnevnik: String,
         selectedClass: String,
-    ){
+    ) {
         viewModelScope.launch {
-            _isLoading.value = true
+            _uiState.value = _uiState.value.copy(
+                isLoading = true
+            )
             val status = LogIo.checkDiaries(loginDnevnik, passwordDnevnik).toInt()
             if (status == 0) {
-                _onErrorLoginDn.value = "Логин или пароль от дневника не верны"
-                _onErrorPasswordDn.value = "Логин или пароль от дневника не верны"
-                _isLoading.value = false
+                _uiState.value = _uiState.value.copy(
+                    onErrorLoginDn = "Логин или пароль от дневника не верны",
+                    onErrorPasswordDn = "Логин или пароль от дневника не верны",
+                    isLoading = false
+                )
+
                 return@launch
             } else {
-                val res = LogIo.registerUser(email, password, selectedClass, loginDnevnik, passwordDnevnik).toBoolean()
+                val res = LogIo.registerUser(
+                    email,
+                    password,
+                    selectedClass,
+                    loginDnevnik,
+                    passwordDnevnik
+                ).toBoolean()
                 if (!res) {
-                    _onError.value = "Произошла ошибка"
-                    _isLoading.value = false
+                    _uiState.value = _uiState.value.copy(
+                        onError = "Произошла ошибка",
+                        isLoading = false,
+                    )
                 } else {
                     val sharedPref = SharedPref(context, "UserData")
-                    sharedPref.update(mapOf("email" to email, "password" to password,
-                        "class" to selectedClass, "loginDn" to loginDnevnik, "passwordDn" to passwordDnevnik))
+                    sharedPref.update(
+                        mapOf(
+                            "email" to email,
+                            "password" to password,
+                            "class" to selectedClass,
+                            "loginDn" to loginDnevnik,
+                            "passwordDn" to passwordDnevnik
+                        )
+                    )
                     loadData(context)
-                    _isLoaded.value = true
+                    _uiState.value = _uiState.value.copy(isLoaded = true)
                 }
 
             }
         }
     }
-
 
 
 }

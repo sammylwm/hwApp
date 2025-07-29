@@ -47,21 +47,22 @@ fun RegisterScreen(
     navHostController: NavHostController,
     view: RegisterViewModel = viewModel()
 ) {
+    val uiState by view.uiState.collectAsState()
     val context = LocalContext.current
-    val isLoading by view.isLoading.collectAsState()
-    val isLoaded by view.isLoaded.collectAsState()
+    val isLoading = uiState.isLoading
+    val isLoaded = uiState.isLoaded
     var email by remember { mutableStateOf("") }
     var loginDn by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordDn by remember { mutableStateOf("") }
     var selectedClass by remember { mutableStateOf("") }
 
-    val error by view.onError.collectAsState()
-    val errorEmail by view.onErrorEmail.collectAsState()
-    val errorPassword by view.onErrorPassword.collectAsState()
-    val errorLoginDn by view.onErrorLoginDn.collectAsState()
-    val errorPasswordDn by view.onErrorPasswordDn.collectAsState()
-    val errorClass by view.onErrorClass.collectAsState()
+    val error = uiState.onError
+    val errorEmail = uiState.onErrorEmail
+    val errorPassword = uiState.onErrorPassword
+    val errorLoginDn = uiState.onErrorLoginDn
+    val errorPasswordDn = uiState.onErrorPasswordDn
+    val errorClass = uiState.onErrorClass
     if (isLoaded) routeScreen(navHostController, "Main")
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
