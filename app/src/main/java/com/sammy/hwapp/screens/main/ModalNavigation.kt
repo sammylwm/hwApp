@@ -1,10 +1,12 @@
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -42,8 +45,11 @@ fun DrawerBody() {
 @Composable
 fun DrawerBodyHome(onGoToAdmins: () -> Unit) {
     val context = LocalContext.current
-    Column(modifier = Modifier.fillMaxWidth()
-        .height(210.dp)
+    val sharedPref = SharedPref(context, "UserData")
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(210.dp)
     ) {
         Image(
             painter = painterResource(id = R.drawable.varnic_fon),
@@ -52,19 +58,32 @@ fun DrawerBodyHome(onGoToAdmins: () -> Unit) {
             modifier = Modifier.fillMaxSize()
         )
     }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(210.dp)
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .padding(bottom = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Дневник Варницкой гимназии.",
+            text = "Дневник",
             fontSize = 24.sp,
             fontWeight = FontWeight.ExtraBold,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .padding(bottom = 16.dp),
+            style = TextStyle(
+                shadow = Shadow(
+                    color = Color.Gray,
+                    offset = Offset(2f, 2f),
+                    blurRadius = 4f
+                )
+            )
+        )
+        Text(
+            text = "Варницкой гимназии.",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = MaterialTheme.colorScheme.primary,
             style = TextStyle(
                 shadow = Shadow(
                     color = Color.Gray,
@@ -74,39 +93,20 @@ fun DrawerBodyHome(onGoToAdmins: () -> Unit) {
             )
         )
 
-        val sharedPref = SharedPref(context, "UserData")
-        if (sharedPref.get("email") ==  sharedPref.get("owner")) {
+        Spacer(modifier = Modifier.height(16.dp))
+        if (sharedPref.get("email") == sharedPref.get("owner")) {
             Text(
                 text = "Администраторы",
-                fontSize = 16.sp,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 8.dp).clickable{
-                    onGoToAdmins()
-                }
+                modifier = Modifier
+                    .clickable {
+                        onGoToAdmins()
+                    }
             )
+
+
         }
-
-
-        Text(
-            text = "1) Разработчик: Феодосий Леднёв",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        Text(
-            text = "2) Цель проекта: Создать удобный дневник для учеников гимназии",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        Text(
-            text = "3) 2025 год",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
     }
 }
