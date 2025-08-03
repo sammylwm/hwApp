@@ -84,6 +84,9 @@ fun HwFragment(view: HwViewModel = viewModel(), date: String) {
         view.loadSharedPref(context)
     }
     LaunchedEffect(date) {
+        view.isLoadedChange(false)
+    }
+    if (!uiState.isLoaded){
         if (uiState.isSharedPref) view.load(date, uiState.className!!)
     }
 
@@ -103,6 +106,8 @@ fun HwFragment(view: HwViewModel = viewModel(), date: String) {
                 }
             }
         }
+
+
         if (uiState.ifAdmin) {
             FloatingActionButton(
                 onClick = { showDialog = true },
@@ -190,7 +195,7 @@ fun SubjectCard(
                 Text(
                     text = homework,
                     fontSize = 14.sp,
-                    color = colorScheme.onSurfaceVariant, // ✅ менее акцентный, но читаемый цвет
+                    color = colorScheme.onSurfaceVariant,
                     modifier = Modifier
                         .padding(top = 12.dp)
                         .fillMaxWidth()

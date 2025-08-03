@@ -34,22 +34,29 @@ data class UiState(
 class HwViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
-    fun showDatePicker(bool: Boolean){
+    fun showDatePicker(bool: Boolean) {
         _uiState.value = _uiState.value.copy(ifShowDatePicker = bool)
     }
-    fun clearSharedPref(context: Context){
+
+    fun isLoadedChange(bool: Boolean) {
+        _uiState.value = _uiState.value.copy(isLoaded = bool)
+    }
+
+    fun clearSharedPref(context: Context) {
         val sharedPref = SharedPref(context, "UserData")
         sharedPref.clear()
     }
-    fun loadSharedPref(context: Context){
+
+    fun loadSharedPref(context: Context) {
         val sharedPref = SharedPref(context, "UserData")
         _uiState.value = _uiState.value.copy(
             className = sharedPref.get("class"),
-            ifAdmin = sharedPref.get("ifAdmin").toBoolean(),
+            ifAdmin = sharedPref.get("ifAdmin") == "1",
             isSharedPref = true
         )
     }
-    fun addHw(homework: String, subject: String, selectedDate: String, className: String){
+
+    fun addHw(homework: String, subject: String, selectedDate: String, className: String) {
         viewModelScope.launch {
             val result = LogIo.addHw(homework, subject, selectedDate, className).toIntOrNull()
             _uiState.value = _uiState.value.copy(
@@ -58,6 +65,7 @@ class HwViewModel : ViewModel() {
             )
         }
     }
+
     fun load(date: String, className: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
@@ -77,8 +85,9 @@ class HwViewModel : ViewModel() {
                         .replace("'", "")
                         .split(", ")
                         .filter { it.isNotBlank() }
-                    homeworkList.add(cleaned.joinToString("\n")
-                        .ifEmpty { "Нет домашнего задания" })
+                    homeworkList.add(
+                        cleaned.joinToString("\n")
+                            .ifEmpty { "Нет домашнего задания" })
                 }
             }
             _uiState.value = _uiState.value.copy(
