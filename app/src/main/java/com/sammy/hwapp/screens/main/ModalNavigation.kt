@@ -1,4 +1,5 @@
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -7,6 +8,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -18,9 +23,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sammy.hwapp.R
+import com.sammy.hwapp.screens.main.AdminFragment
+
 
 @Composable
-fun DrawerHeader() {
+fun DrawerBody() {
+    var currentScreen by remember { mutableStateOf("home") }
+
+    when (currentScreen) {
+        "home" -> DrawerBodyHome(onGoToAdmins = { currentScreen = "admins" })
+        "admins" -> AdminFragment(onBack = { currentScreen = "home" })
+    }
+}
+
+
+@Composable
+fun DrawerBodyHome(onGoToAdmins: () -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()
         .height(210.dp)
     ) {
@@ -31,11 +49,6 @@ fun DrawerHeader() {
             modifier = Modifier.fillMaxSize()
         )
     }
-}
-
-
-@Composable
-fun DrawerBody() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -56,6 +69,17 @@ fun DrawerBody() {
                     blurRadius = 4f
                 )
             )
+        )
+
+
+        Text(
+            text = "Администраторы",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 8.dp).clickable{
+                onGoToAdmins()
+            }
         )
 
         Text(

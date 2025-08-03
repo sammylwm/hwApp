@@ -40,6 +40,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("androidx.navigation:navigation-compose:2.9.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:{latest_version}")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")

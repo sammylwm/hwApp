@@ -140,4 +140,20 @@ object LogIo {
         }
         return responseSuspend("class/get_members", json)
     }
+
+    suspend fun addAdmin(className: String, email: String): String {
+        val json = JSONObject().apply {
+            put("class_name", className)
+            put("email", email)
+        }
+        return responseSuspend("class/add_admin", json)
+    }
+
+    suspend fun delAdmin(className: String, email: String): String {
+        val json = JSONObject().apply {
+            put("class_name", className)
+            put("email", email)
+        }
+        return responseSuspend("class/del_admin", json)
+    }
 }

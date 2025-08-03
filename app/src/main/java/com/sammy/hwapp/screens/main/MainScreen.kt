@@ -1,7 +1,6 @@
 package com.sammy.hwapp.screens.main
 
 import DrawerBody
-import DrawerHeader
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -86,7 +85,6 @@ fun MainScreen(navHostController: NavHostController, viewModel: HwViewModel = vi
     ModalNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet {
-                DrawerHeader()
                 DrawerBody()
             }
         },

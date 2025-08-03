@@ -72,8 +72,8 @@ suspend fun loadData(context: Context){
     val membersRes = LogIo.getMembers(className)
     val json = JSONObject(membersRes)
 
-    val members = json.optJSONArray("members") ?: JSONArray()
+    val owner = json.getString("owner")
     val admins = json.optJSONArray("admins") ?: JSONArray()
-    sharedPref.update(mapOf("members"  to members.toString(), "admins" to admins.toString()))
+    sharedPref.update(mapOf("owner"  to owner, "admins" to admins.toString()))
     done()
 }
