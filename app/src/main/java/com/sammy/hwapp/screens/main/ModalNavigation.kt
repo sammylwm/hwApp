@@ -17,12 +17,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sammy.hwapp.R
+import com.sammy.hwapp.SharedPref
 import com.sammy.hwapp.screens.main.AdminFragment
 
 
@@ -39,6 +41,7 @@ fun DrawerBody() {
 
 @Composable
 fun DrawerBodyHome(onGoToAdmins: () -> Unit) {
+    val context = LocalContext.current
     Column(modifier = Modifier.fillMaxWidth()
         .height(210.dp)
     ) {
@@ -71,16 +74,19 @@ fun DrawerBodyHome(onGoToAdmins: () -> Unit) {
             )
         )
 
+        val sharedPref = SharedPref(context, "UserData")
+        if (sharedPref.get("email") ==  sharedPref.get("owner")) {
+            Text(
+                text = "Администраторы",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 8.dp).clickable{
+                    onGoToAdmins()
+                }
+            )
+        }
 
-        Text(
-            text = "Администраторы",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 8.dp).clickable{
-                onGoToAdmins()
-            }
-        )
 
         Text(
             text = "1) Разработчик: Феодосий Леднёв",
