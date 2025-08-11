@@ -11,11 +11,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -86,6 +90,46 @@ fun HeadingTextComponent(value: String) {
         textAlign = TextAlign.Center
     )
 }
+
+@Composable
+fun ApplyEmail(
+    code: String,
+    isError: Boolean,
+    check:() -> Unit,
+    onValueChange: (String) -> Unit,
+    isCodeConfirmed: Boolean=false,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        MyTextFieldComponent(
+            labelValue = "Код подтверждения",
+            icon = Icons.Default.Lock,
+            textValue = code,
+            onValueChange = onValueChange,
+            isError = isError
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Button(
+            onClick = check,
+            enabled = !isCodeConfirmed,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (isCodeConfirmed) Color.Gray else AccentColor,
+                contentColor = Color.White,
+                disabledContainerColor = Color.LightGray,
+                disabledContentColor = Color.DarkGray
+            ),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("ОК")
+        }
+    }
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

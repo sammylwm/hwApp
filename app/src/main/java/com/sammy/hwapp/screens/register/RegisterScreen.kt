@@ -1,6 +1,8 @@
 package com.sammy.hwapp.screens.register
 
 import android.os.Build
+import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -32,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.montanainc.simpleloginscreen.components.ApplyEmail
 import com.montanainc.simpleloginscreen.components.ClassSelectorComponent
 import com.montanainc.simpleloginscreen.components.HeadingTextComponent
 import com.montanainc.simpleloginscreen.components.MyTextFieldComponent
@@ -64,6 +67,46 @@ fun RegisterScreen(
     val errorPasswordDn = uiState.onErrorPasswordDn
     val errorClass = uiState.onErrorClass
     if (isLoaded) routeScreen(navHostController, "Main")
+
+    if (uiState.showDialog) {
+        CodeApplyDialog(
+            code = uiState.code,
+            isError = uiState.codeIsError,
+            onDismiss = { view.showDialog(false, email) },
+            onCodeChange = {
+                view.updateCode(it)
+            },
+            onConfirm = {
+                if (uiState.codeReal.isBlank()) return@CodeApplyDialog
+                if (uiState.codeReal == "0") {
+                    Toast.makeText(
+                        context,
+                        "Произошла ошибка. Скорее всего такой аккаунт уже есть!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else if (uiState.code != uiState.codeReal) {
+                    Toast.makeText(
+                        context,
+                        "Код неверен. Проверьте код в письме.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    view.checkCode(false)
+                } else {
+                    view.checkCode(true)
+                    view.showDialog(false, "")
+                    view.checkDataDiaries(
+                        context,
+                        email = email,
+                        password = password,
+                        loginDnevnik = loginDn,
+                        passwordDnevnik = passwordDn,
+                        selectedClass = selectedClass,
+                    )
+                }
+            },
+            isCodeConfirmed = uiState.isCodeConfirmed
+        )
+    }
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
@@ -96,6 +139,7 @@ fun RegisterScreen(
                     errorEmail?.let {
                         Text(it, color = Color.Red, fontSize = 12.sp)
                     }
+
                     Spacer(modifier = Modifier.height(10.dp))
                     PasswordTextFieldComponent(
                         labelValue = "Пароль",
@@ -140,18 +184,13 @@ fun RegisterScreen(
                     Spacer(modifier = Modifier.weight(1f))
                     RegisterButton(
                         onClick = {
-                            val validate = view.validate(email, password, loginDn, passwordDn, selectedClass)
+                            val validate =
+                                view.validate(email, password, loginDn, passwordDn, selectedClass)
                             if (!validate) return@RegisterButton
                             selectedClass =
                                 selectedClass.replace("А", "A").replace("Б", "B").replace("В", "V")
-                            view.checkDataDiaries(
-                                context,
-                                email = email,
-                                password = password,
-                                loginDnevnik = loginDn,
-                                passwordDnevnik = passwordDn,
-                                selectedClass = selectedClass,
-                            )
+                            if (!uiState.isCodeConfirmed) view.showDialog(true, email)
+
                         },
                         isEnabled = true,
                         errorMessage = error,

@@ -22,7 +22,7 @@ object LogIo {
         val body = json.toString().toRequestBody(mediaType)
 
         val request = Request.Builder()
-            .url("http://95.105.83.21:8000/$method/")
+            .url("https://lednevs.ru/hw_api/$method/")
             .post(body)
             .build()
 
@@ -147,6 +147,13 @@ object LogIo {
             put("email", email)
         }
         return responseSuspend("class/add_admin", json)
+    }
+
+    suspend fun getCode(email: String): String {
+        val json = JSONObject().apply {
+            put("email", email)
+        }
+        return responseSuspend("register", json)
     }
 
     suspend fun delAdmin(className: String, email: String): String {

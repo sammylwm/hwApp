@@ -2,7 +2,12 @@ package com.sammy.hwapp.screens.register
 
 import LogIo
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
@@ -12,6 +17,7 @@ import com.sammy.hwapp.screens.splash.loadData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class RegisterUiState(
@@ -23,6 +29,11 @@ data class RegisterUiState(
     val onErrorLoginDn: String? = null,
     val onErrorPasswordDn: String? = null,
     val onErrorClass: String? = null,
+    val showDialog: Boolean = false,
+    val code: String = "",
+    val codeReal: String = "",
+    val codeIsError: Boolean = false,
+    val isCodeConfirmed: Boolean = false
 )
 
 
@@ -34,8 +45,9 @@ class RegisterViewModel : ViewModel() {
         password: String,
         loginDn: String,
         passwordDn: String,
-        selectedClass: String
+        selectedClass: String,
     ): Boolean {
+
         when {
             email.isBlank() || password.isBlank() || loginDn.isBlank()
                     || passwordDn.isBlank() || selectedClass.isBlank() -> {
@@ -80,6 +92,28 @@ class RegisterViewModel : ViewModel() {
         return true
     }
 
+    fun showDialog(boolean: Boolean, email: String){
+        if (boolean) {
+            viewModelScope.launch {
+                val res = LogIo.getCode(email).toInt()
+                Log.d("SAMMY", res.toString())
+                _uiState.update { it.copy(codeReal = res.toString()) }
+            }
+        }
+        _uiState.update { it.copy(showDialog = boolean) }
+    }
+    fun updateCode(code: String) {
+        _uiState.update { it.copy(code = code, codeIsError = false) }
+    }
+    fun checkCode(status: Boolean) {
+        _uiState.update {
+            if (status) {
+                it.copy(isCodeConfirmed = true, codeIsError = false)
+            } else {
+                it.copy(codeIsError = true)
+            }
+        }
+    }
     @RequiresApi(Build.VERSION_CODES.O)
     fun checkDataDiaries(
         context: android.content.Context,
