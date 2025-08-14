@@ -43,7 +43,9 @@ class SplashViewModel : ViewModel() {
             viewModelScope.launch {
                 val result = LogIo.loginUser(email, password).toIntOrNull()
                 _loginResult.value = result
-                loadData(context)
+                if (result == 2) {
+                    loadData(context)
+                }
                 _isLoaded.value = true
             }
         } else {
